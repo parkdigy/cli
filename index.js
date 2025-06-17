@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
-const { exec } = require("child_process");
+const { spawn } = require("child_process");
 
 const args = process.argv;
 
 if (args.length === 2) {
   console.log("Usage: pdg <command>");
   console.log("i | install : npm install");
+  console.log("ui | uninstall : npm uninstall");
   console.log("id | install-dev : npm install --save-dev");
   console.log("ig | install-global : npm install --global");
   console.log("ri | reinstall : reinstall modules");
@@ -29,16 +30,20 @@ function run(execCommands) {
       }
       resolve();
     } else {
-      exec(execCommands, (error, stdout, stderr) => {
-        console.log(`> ${execCommands}`);
-        if (error) {
-          console.error(error.message);
-          process.exit(1);
-        } else if (stderr) {
-          console.error(stderr);
+      console.log(`> ${execCommands}`);
+
+      const execCommandsArray = execCommands.split(" ");
+      const command = execCommandsArray[0];
+      const args = execCommandsArray.slice(1);
+      const child = spawn(command, args, {
+        stdio: "inherit",
+        shell: true,
+      });
+
+      child.on("close", (code) => {
+        if (code !== 0) {
           process.exit(1);
         } else {
-          console.log(stdout);
           resolve();
         }
       });
@@ -51,6 +56,8 @@ function run(execCommands) {
 
   if (["i", "install"].includes(command)) {
     await npmInstall();
+  } else if (["ui", "uninstall"].includes(command)) {
+    await npmUninstall();
   } else if (["id", "install-dev"].includes(command)) {
     await npmInstall("dev");
   } else if (["ig", "install-global"].includes(command)) {
@@ -86,7 +93,6 @@ function run(execCommands) {
 /********************************************************************************************************************
  * npmInstall
  * ******************************************************************************************************************/
-
 async function npmInstall(type) {
   const command =
     type === "global"
@@ -110,19 +116,18 @@ async function npmInstall(type) {
 /********************************************************************************************************************
  * npmUninstall
  * ******************************************************************************************************************/
-
 async function npmUninstall() {
   const command = "npm uninstall";
 
-  const options = args.splice(3);
+  const packages = args.splice(3);
 
-  if (isSaveDev && options.length === 0) {
-    console.error("Usage: pdg id <package1> <package2> ...");
+  if (packages.length === 0) {
+    console.error("Usage: pdg ui <package1> <package2> ...");
     process.exit(1);
   }
 
   await run(
-    options.length > 0 ? `${command} ${options.join(" ")}` : `${command}`,
+    packages.length > 0 ? `${command} ${packages.join(" ")}` : `${command}`,
   );
 }
 

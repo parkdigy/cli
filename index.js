@@ -1,34 +1,37 @@
 #!/usr/bin/env node
 
+const ll = console.log;
+const le = console.error;
+
 const { spawn } = require("child_process");
 
 const args = process.argv;
 
 if (args.length === 2) {
-  console.log("Usage: pdg <command>");
-  console.log("i | install : npm install");
-  console.log("ui | uninstall : npm uninstall");
-  console.log("id | install-dev : npm install --save-dev");
-  console.log("ig | install-global : npm install --global");
-  console.log("ri | reinstall : npm run reinstall");
-  console.log("rim | reinstall-module : npm run reinstall:module");
-  console.log("rib | reinstall-bundle : npm run reinstall:bundle");
-  console.log("rip | reinstall-pod : npm run reinstall:pod");
-  console.log("c | commit : npm run git:commit");
-  console.log("p | push : npm run git:push");
-  console.log("cp | commit-push : npm run git:commit:push");
-  console.log(
+  ll("Usage: pdg <command>");
+  ll("i | install : npm install");
+  ll("ui | uninstall : npm uninstall");
+  ll("id | install-dev : npm install --save-dev");
+  ll("ig | install-global : npm install --global");
+  ll("ri | reinstall : npm run reinstall");
+  ll("rim | reinstall-module : npm run reinstall:module");
+  ll("rib | reinstall-bundle : npm run reinstall:bundle");
+  ll("rip | reinstall-pod : npm run reinstall:pod");
+  ll("c | commit : npm run git:commit");
+  ll("p | push : npm run git:push");
+  ll("cp | commit-push : npm run git:commit:push");
+  ll(
     "cpp | commit-push-publish : npm run git:commit:push && npm run pub:(all|dev|staging|prod)",
   );
-  console.log("mm | merge-mirror : npm run git:merge:mirror");
-  console.log("b | build : npm run build");
-  console.log("pub | publish : npm run pub:(all|dev|staging|prod)");
-  console.log("lint : npm run lint");
-  console.log("test : npm run test");
-  console.log("gi | reset-gitignore : npm run reset:gitignore");
-  console.log("gc | git-commit : git commit");
-  console.log("gp | git-push : git push");
-  console.log("gcp | git-commit-push : git commit and push");
+  ll("mm | merge-mirror : npm run git:merge:mirror");
+  ll("b | build : npm run build");
+  ll("pub | publish : npm run pub:(all|dev|staging|prod)");
+  ll("lint : npm run lint");
+  ll("test : npm run test");
+  ll("gi | reset-gitignore : npm run reset:gitignore");
+  ll("gc | git-commit : git commit");
+  ll("gp | git-push : git push");
+  ll("gcp | git-commit-push : git commit and push");
   process.exit(1);
 }
 
@@ -40,7 +43,7 @@ function run(execCommands) {
       }
       resolve();
     } else {
-      console.log(`> ${execCommands}`);
+      ll(`> ${execCommands}`);
 
       const execCommandsArray = execCommands.split(" ");
       const command = execCommandsArray[0];
@@ -88,9 +91,7 @@ function run(execCommands) {
     await npmRunGitCommit();
     await run("npm run git:push");
   } else if (["cpp", "commit-push-publish"].includes(command)) {
-    await npmRunGitCommit();
-    await run("npm run git:push");
-    await publish();
+    await npmRunGitCommitPushPublish();
   } else if (["mm", "merge-mirror"].includes(command)) {
     await run("npm run git:merge:mirror");
   } else if (["b", "build"].includes(command)) {
@@ -111,7 +112,7 @@ function run(execCommands) {
     await gitCommit();
     await run("git push");
   } else {
-    console.error(`Unknown command: ${command}`);
+    le(`Unknown command: ${command}`);
   }
 })();
 
@@ -129,7 +130,7 @@ async function npmInstall(type) {
   const packages = args.splice(3);
 
   if (type === "dev" && packages.length === 0) {
-    console.error("Usage: pdg id <package1> <package2> ...");
+    le("Usage: pdg id <package1> <package2> ...");
     process.exit(1);
   }
 
@@ -147,7 +148,7 @@ async function npmUninstall() {
   const packages = args.splice(3);
 
   if (packages.length === 0) {
-    console.error("Usage: pdg ui <package1> <package2> ...");
+    le("Usage: pdg ui <package1> <package2> ...");
     process.exit(1);
   }
 
@@ -168,6 +169,40 @@ async function npmRunGitCommit() {
 
   await run([`npm run git:commit "${commitMessage}"`]);
 }
+
+/********************************************************************************************************************
+ * npmRunGitCommitPushPublish
+ * ******************************************************************************************************************/
+async function npmRunGitCommitPushPublish() {
+  let commitMessage = "Update";
+  let publishMode = "";
+
+  if (args.length < 4) {
+    le("Usage: pdg cpp <commit-message> (all|dev|staging|prod)");
+    le("Usage: pdg cpp (all|dev|staging|prod)");
+    process.exit(1);
+  }
+
+  if (args.length === 4) {
+    publishMode = args[3];
+  } else if (args.length > 4) {
+    commitMessage = args[3];
+    publishMode = args[4];
+  }
+
+  if (!["all", "dev", "staging", "prod"].includes(publishMode)) {
+    le("Usage: pdg cpp <commit-message> (all|dev|staging|prod)");
+    le("Usage: pdg cpp (all|dev|staging|prod)");
+    process.exit(1);
+  }
+
+  await run([
+    `npm run git:commit "${commitMessage}"`,
+    "npm run git:push",
+    `npm run pub:${publishMode}`,
+  ]);
+}
+
 /********************************************************************************************************************
  * gitCommit
  * ******************************************************************************************************************/
@@ -186,15 +221,13 @@ async function gitCommit() {
  * ******************************************************************************************************************/
 async function publish() {
   if (args.length < 4) {
-    console.error("Usage: pdg pub (all|dev|staging|prod)");
+    le("Usage: pdg pub (all|dev|staging|prod)");
     process.exit(1);
   }
 
   const mode = args[3];
   if (!["all", "dev", "staging", "prod"].includes(mode)) {
-    console.error(
-      `Invalid mode: ${mode}\nUsage: pdg pub (all|dev|staging|prod)`,
-    );
+    le(`Invalid mode: ${mode}\nUsage: pdg pub (all|dev|staging|prod)`);
     process.exit(1);
   }
 

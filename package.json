@@ -1,6 +1,6 @@
 {
   "name": "@pdg/cli",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "CLI",
   "bin": {
     "pdg": "./index.js"
@@ -19,7 +19,10 @@
     "README.md"
   ],
   "scripts": {
-    "pub": "npm publish --access=public && rm ./.git/hooks/pre-commit"
+    "pub": "npm publish --access=public && rm ./.git/hooks/pre-commit",
+    "git:commit": "node .git-commit.js",
+    "git:push": "git push",
+    "git:commit:push": "npm run git:commit && npm run git:push"
   },
   "author": "YOUNG CHUL PARK",
   "license": "MIT",

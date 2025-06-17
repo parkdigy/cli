@@ -17,6 +17,9 @@ if (args.length === 2) {
   console.log("c | commit : npm run git:commit");
   console.log("p | push : npm run git:push");
   console.log("cp | commit-push : npm run git:commit:push");
+  console.log(
+    "cpp | commit-push-publish : npm run git:commit:push && npm run pub:(all|dev|staging|prod)",
+  );
   console.log("mm | merge-mirror : npm run git:merge:mirror");
   console.log("b | build : npm run build");
   console.log("pub | publish : npm run pub:(all|dev|staging|prod)");
@@ -84,6 +87,10 @@ function run(execCommands) {
   } else if (["cp", "commit-push"].includes(command)) {
     await npmRunGitCommit();
     await run("npm run git:push");
+  } else if (["cpp", "commit-push-publish"].includes(command)) {
+    await npmRunGitCommit();
+    await run("npm run git:push");
+    await publish();
   } else if (["mm", "merge-mirror"].includes(command)) {
     await run("npm run git:merge:mirror");
   } else if (["b", "build"].includes(command)) {

@@ -1,0 +1,33 @@
+{
+  "name": "@pdg/cli",
+  "version": "1.0.0",
+  "description": "CLI",
+  "bin": {
+    "pdg": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parkdigy/cli.git",
+    "baseUrl": "https://github.com/parkdigy/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/parkdigy/cli/issues"
+  },
+  "homepage": "https://github.com/parkdigy/cli#readme",
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "scripts": {
+    "pub": "npm publish --access=public && rm ./.git/hooks/pre-commit"
+  },
+  "author": "YOUNG CHUL PARK",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "keywords": [
+    "cli"
+  ],
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  }
+}

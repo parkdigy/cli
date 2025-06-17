@@ -23,6 +23,7 @@
     "git:commit": "node .git-commit.js",
     "git:push": "git push",
     "git:commit:push": "npm run git:commit && npm run git:push",
+    "reset:gitignore": "git rm -r --cached . && git add .",
     "reinstall": "npm run reinstall:module",
     "reinstall:module": "rm -rf node_modules && rm -f package-lock.json && npm i"
   },

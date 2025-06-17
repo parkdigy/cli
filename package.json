@@ -22,7 +22,9 @@
     "pub": "npm publish --access=public && rm ./.git/hooks/pre-commit",
     "git:commit": "node .git-commit.js",
     "git:push": "git push",
-    "git:commit:push": "npm run git:commit && npm run git:push"
+    "git:commit:push": "npm run git:commit && npm run git:push",
+    "reinstall": "npm run reinstall:module",
+    "reinstall:module": "rm -rf node_modules && rm -f package-lock.json && npm i"
   },
   "author": "YOUNG CHUL PARK",
   "license": "MIT",

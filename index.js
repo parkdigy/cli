@@ -10,15 +10,22 @@ if (args.length === 2) {
   console.log("ui | uninstall : npm uninstall");
   console.log("id | install-dev : npm install --save-dev");
   console.log("ig | install-global : npm install --global");
-  console.log("ri | reinstall : reinstall modules");
-  console.log("c | commit : git commit");
-  console.log("p | push : git push");
-  console.log("cp | commit-push : git commit and push");
+  console.log("ri | reinstall : npm run reinstall");
+  console.log("rim | reinstall-module : npm run reinstall:module");
+  console.log("rib | reinstall-bundle : npm run reinstall:bundle");
+  console.log("rip | reinstall-pod : npm run reinstall:pod");
+  console.log("c | commit : npm run git:commit");
+  console.log("p | push : npm run git:push");
+  console.log("cp | commit-push : npm run git:commit:push");
+  console.log("mm | merge-mirror : npm run git:merge:mirror");
   console.log("b | build : npm run build");
   console.log("pub | publish : npm run pub:(all|dev|staging|prod)");
   console.log("lint : npm run lint");
   console.log("test : npm run test");
-  console.log("gi | reset-gitignore : reset git ignore");
+  console.log("gi | reset-gitignore : npm run reset:gitignore");
+  console.log("gc | git-commit : git commit");
+  console.log("gp | git-push : git push");
+  console.log("gcp | git-commit-push : git commit and push");
   process.exit(1);
 }
 
@@ -63,18 +70,22 @@ function run(execCommands) {
   } else if (["ig", "install-global"].includes(command)) {
     await npmInstall("global");
   } else if (["ri", "reinstall"].includes(command)) {
-    await run([
-      "rm -rf node_modules",
-      "rm -f package-lock.json",
-      "npm install",
-    ]);
+    await run("npm run reinstall");
+  } else if (["rim", "reinstall-module"].includes(command)) {
+    await run("npm run reinstall:module");
+  } else if (["rib", "reinstall-bundle"].includes(command)) {
+    await run("npm run reinstall:bundle");
+  } else if (["rip", "reinstall-pod"].includes(command)) {
+    await run("npm run reinstall:pod");
   } else if (["c", "commit"].includes(command)) {
-    await gitCommit();
+    await npmRunGitCommit();
   } else if (["p", "push"].includes(command)) {
-    await run("git push");
+    await run("npm run git:push");
   } else if (["cp", "commit-push"].includes(command)) {
-    await gitCommit();
-    await run("git push");
+    await npmRunGitCommit();
+    await run("npm run git:push");
+  } else if (["mm", "merge-mirror"].includes(command)) {
+    await run("npm run git:merge:mirror");
   } else if (["b", "build"].includes(command)) {
     await run("npm run build");
   } else if (["pub", "publish"].includes(command)) {
@@ -84,7 +95,14 @@ function run(execCommands) {
   } else if (command === "test") {
     await run("npm run test");
   } else if (["gi", "reset-gitignore"].includes(command)) {
-    await run(["git rm -r --cached .", "git add ."]);
+    await run("npm run reset:gitignore");
+  } else if (["gc", "git-commit"].includes(command)) {
+    await gitCommit();
+  } else if (["gp", "git-push"].includes(command)) {
+    await run("git push");
+  } else if (["gcp", "git-commit-push"].includes(command)) {
+    await gitCommit();
+    await run("git push");
   } else {
     console.error(`Unknown command: ${command}`);
   }
@@ -131,6 +149,18 @@ async function npmUninstall() {
   );
 }
 
+/********************************************************************************************************************
+ * npmRunGitCommit
+ * ******************************************************************************************************************/
+async function npmRunGitCommit() {
+  let commitMessage = "Update";
+
+  if (args.length >= 4) {
+    commitMessage = args[3];
+  }
+
+  await run([`npm run git:commit "${commitMessage}"`]);
+}
 /********************************************************************************************************************
  * gitCommit
  * ******************************************************************************************************************/

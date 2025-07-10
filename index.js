@@ -27,6 +27,7 @@ if (args.length === 2) {
   ll("b | build : npm run build");
   ll("pub | publish : npm run pub:(all|dev|staging|prod)");
   ll("lint : npm run lint");
+  ll("tsc : npm run tsc");
   ll("test : npm run test");
   ll("gi | reset-gitignore : npm run reset:gitignore");
   ll("gc | git-commit : git commit");
@@ -100,6 +101,8 @@ function run(execCommands) {
     await publish();
   } else if (command === "lint") {
     await run("npm run lint");
+  } else if (command === "tsc") {
+    await run("npm run tsc");
   } else if (command === "test") {
     await run("npm run test");
   } else if (["gi", "reset-gitignore"].includes(command)) {
